@@ -10,6 +10,9 @@ public class LetterFrequencies
 	/** Count for each letter */
 	private int [] alphaCounts;
 	
+	/** Frequency counts */
+	private double [] textFreq;
+	
 	/** The alphabet */
 	private char [] alphabet; 
 												 	
@@ -29,7 +32,16 @@ public class LetterFrequencies
 	 */
 	public LetterFrequencies()
 	{
-	    // your code
+		alphabet = new char [SIZE];
+	    alphaCounts = new int [SIZE];	
+	    textFreq = new double [SIZE];
+	    for (int i = 0; i < SIZE; i++)
+		{
+			alphabet[i] = (char)('A' + i);
+			alphaCounts[i] = 0;
+			textFreq[i] = 0;
+		}
+	    totChars = 0;
 	}
 		
 	/**
@@ -38,6 +50,9 @@ public class LetterFrequencies
 	 */
 	public void addChar(char ch)
 	{
+		int index = ch-'A';
+		alphaCounts[index]++;
+		totChars++;
 	    // your code
 	}
 	
@@ -46,8 +61,20 @@ public class LetterFrequencies
 	 * @return the maximum frequency
 	 */
 	private double getMaxPC()
-        {
-	    return 0.0;  // replace with your code
+    {
+		int index = maxCh-'A';
+		return textFreq[index];
+	}
+	
+	/**
+	 * Updates array with letter frequencies.
+	 */
+	public void calculateFreqPercentage()
+	{
+		for(int i=0; i<SIZE; i++)
+		{
+			textFreq[i] = alphaCounts[i]/(totChars*1.0);
+		}
 	}
 	
 	/**
@@ -56,6 +83,22 @@ public class LetterFrequencies
 	 */
 	public String getReport()
 	{
-	    return "";  // replace with your code
+		String report = "LETTER ANALYSIS \n \n";
+		String headings = String.format("%7s %5s %6s %9s %5s \n", "Letter", "Freq", "Freq%", "AvgFreq%", "Diff");
+		report = report + headings;
+		for(int i=0; i<SIZE; i++)
+		{
+			String row = String.format("%7s %5d %6f %9f %5f", alphabet[i], alphaCounts[i], textFreq[i], avgCounts[i], (textFreq[i] - avgCounts[i]));
+			report = report + row +"\n";
+		}
+		report = report + "\n \n The most frequent letter is " + maxCh + " at " + getMaxPC();
+	    return report;  // replace with your code
+	}
+	
+	public static void main(String[] args)
+	{
+		LetterFrequencies test = new LetterFrequencies();
+		System.out.println(test.getReport());
+		
 	}
 }

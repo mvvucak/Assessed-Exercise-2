@@ -90,7 +90,7 @@ public class CipherGUI extends JFrame implements ActionListener
 	    {
 	    	if(e.getSource() == monoButton)
 	    	{
-	    		mcipher = new MonoCipher(keyField.getText());
+	    		mcipher = new MonoCipher(keyField.getText().toUpperCase());
 	    		keyField.setText("");
 	    		processFile(false);
 	    	}
@@ -124,9 +124,15 @@ public class CipherGUI extends JFrame implements ActionListener
 			keyField.setText("");
 			return false;
 		}
-		else if (containsNumbersOrPunctuation(keyword))
+		else if (containsNumbers(keyword))
 		{
-			JOptionPane.showMessageDialog(null, "The keyword cannot contain numbers or punctuation.", "Invalid Keyword", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "The keyword cannot contain numbers.", "Invalid Keyword", JOptionPane.ERROR_MESSAGE);
+			keyField.setText("");
+			return false;
+		}
+		else if (containsPunctuation(keyword))
+		{
+			JOptionPane.showMessageDialog(null, "The keyword cannot contain punctuation.", "Invalid Keyword", JOptionPane.ERROR_MESSAGE);
 			keyField.setText("");
 			return false;
 		}
@@ -163,24 +169,47 @@ public class CipherGUI extends JFrame implements ActionListener
 	
 	/** 
 	 * Is passed cipher keyword
-	 * Checks if keyword contains numbers or punctuation. Assumes all letters in the keyword are capitalized.
-	 * @return whether keyword contains numbers or punctuation.
+	 * Checks if keyword contains punctuation. 
+	 * @return whether keyword contains punctuation.
 	 */
-	public boolean containsNumbersOrPunctuation(String s)
+	public boolean containsPunctuation(String s)
 	{
+		//Capitalize all letters in keyword to simplify test (i.e. smaller range of unicode values).
+		s = s.toUpperCase();
 		//Go through every character in keyword
 		for(int i=0; i<s.length(); i++)
 		{
-			//Use unicode value to determine if character is not in the alphabet. 
-			int difference = s.charAt(i)-'A';
-			if(difference<0 && difference>25)
+			//Use unicode values to determine if character is not in the alphabet AND not a number.
+			int differenceInt = s.charAt(i)-'0';
+			System.out.println(differenceInt);
+			int differenceLetter = s.charAt(i)-'A';
+			System.out.println(differenceLetter);
+			boolean notANumber = differenceInt < 0 || differenceInt > 10;
+			boolean notALetter = differenceLetter < 0 || differenceLetter > 25;
+			
+			//If character unicode value is not in range of either numbers or letters
+			if(notANumber && notALetter)
 			{
 				return true;
 			}
-			
 		}
 		return false;
 	}
+	
+	public boolean containsNumbers(String s)
+	{
+		for(int i=0; i<s.length(); i++)
+		{
+			int difference = s.charAt(i)-'0';
+			if(difference >= 0 && difference <= 10)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 	
 	
 	/** 
@@ -206,9 +235,9 @@ public class CipherGUI extends JFrame implements ActionListener
 			JOptionPane.showMessageDialog(null, "Please ensure that the filename ends with: \n 'P' for plaintext files OR \n 'C' For encrypted files.", "Invalid File Name", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
-		else if(containsNumbersOrPunctuation(fileName))
+		else if(containsPunctuation(fileName))
 		{
-			JOptionPane.showMessageDialog(null, "The file name cannot contain punctuation or numbers", "Invalid File Name", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "The file name cannot contain punctuation.", "Invalid File Name", JOptionPane.ERROR_MESSAGE);
 			keyField.setText("");
 			return false;
 		}
