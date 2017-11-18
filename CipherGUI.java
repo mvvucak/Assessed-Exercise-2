@@ -85,6 +85,7 @@ public class CipherGUI extends JFrame implements ActionListener
 	 */
 	public void actionPerformed(ActionEvent e)
 	{
+		//Validate keyword and file name.
 		boolean inputIsValid = getKeyword() && processFileName();
 	    if(inputIsValid)
 	    {
@@ -261,6 +262,7 @@ public class CipherGUI extends JFrame implements ActionListener
 	{
 		String fileNameActual = fileName + ".txt";
 		String outputFileName = fileName.substring(0, fileName.length()-1);
+		String reportFileName = outputFileName +"F.txt";
 		if(codeType == 'P')
 		{
 			outputFileName = outputFileName + "C.txt";
@@ -274,6 +276,8 @@ public class CipherGUI extends JFrame implements ActionListener
 		{
 			FileReader reader = new FileReader(fileNameActual);
 			FileWriter writer = new FileWriter(outputFileName);
+			FileWriter reportWriter = new FileWriter(reportFileName);
+			LetterFrequencies reporter = new LetterFrequencies();
 			
 			boolean loop = true;
 			while(loop)
@@ -291,24 +295,35 @@ public class CipherGUI extends JFrame implements ActionListener
 				}
 				else
 				{
-					//Test prints to ensure that reader is actually reading the text file.
-					//Code will be replaced with calls to encode/decode and writing to a file.
 					//Cast from int to char to get character.
 					nextChar = (char) next;
 					if(codeType == 'P')
 					{
-						writer.write(mcipher.encode(nextChar));
+						char encoded = mcipher.encode(nextChar);
+						writer.write(encoded);
+						if(mcipher.isALetter(encoded))
+						{
+							reporter.addChar(encoded);
+						}
 					}
 					else
 					{
-						writer.write(mcipher.decode(nextChar));
+						char decoded = mcipher.decode(nextChar);
+						writer.write(decoded);
+						if(mcipher.isALetter(decoded))
+						{
+							reporter.addChar(decoded);
+						}
 					}
 					System.out.print(nextChar);
 				}
 			}
+			String report = reporter.getReport();
+			reportWriter.write(report);
 			
 			reader.close();
 			writer.close();
+			reportWriter.close();
 		}
 		catch(FileNotFoundException e)
 		{

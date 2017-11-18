@@ -69,12 +69,33 @@ public class LetterFrequencies
 	/**
 	 * Updates array with letter frequencies.
 	 */
-	public void calculateFreqPercentage()
+	private void calculateFreqPercentage()
 	{
 		for(int i=0; i<SIZE; i++)
 		{
-			textFreq[i] = alphaCounts[i]/(totChars*1.0);
+			textFreq[i] = (alphaCounts[i]/(totChars*1.0))*100.0;
 		}
+		
+	}
+	
+	/**
+	 * Updates maxChar with most frequently occurring character
+	 */
+	private void updateMaxCh()
+	{
+		int maxCount = 0;
+		int maxCountIndex = 0;
+		
+		for(int i = 0; i<SIZE; i++)
+		{
+			if(alphaCounts[i] > maxCount || alphaCounts[i] == maxCount)
+			{
+				maxCount = alphaCounts[i];
+				maxCountIndex = i;
+			}
+		}
+		
+		maxCh = alphabet [maxCountIndex];
 	}
 	
 	/**
@@ -83,16 +104,20 @@ public class LetterFrequencies
 	 */
 	public String getReport()
 	{
-		String report = "LETTER ANALYSIS \n \n";
-		String headings = String.format("%7s %5s %6s %9s %5s \n", "Letter", "Freq", "Freq%", "AvgFreq%", "Diff");
+		updateMaxCh();
+		calculateFreqPercentage();
+		String report = String.format("LETTER ANALYSIS %n %n");
+		String headings = String.format("%7s %5s %6s %9s %5s %n", "Letter", "Freq", "Freq%", "AvgFreq%", "Diff");
 		report = report + headings;
+		
 		for(int i=0; i<SIZE; i++)
 		{
-			String row = String.format("%7s %5d %6f %9f %5f", alphabet[i], alphaCounts[i], textFreq[i], avgCounts[i], (textFreq[i] - avgCounts[i]));
-			report = report + row +"\n";
+			String row = String.format("%4s %7d %6.1f %7.1f %7.1f %n", alphabet[i], alphaCounts[i], textFreq[i], avgCounts[i], (textFreq[i] - avgCounts[i]));
+			report = report + row;
 		}
-		report = report + "\n \n The most frequent letter is " + maxCh + " at " + getMaxPC();
-	    return report;  // replace with your code
+		
+		report = report + String.format("%n The most frequent letter is %c at %.1f", maxCh, getMaxPC()) + "%.";
+	    return report; 
 	}
 	
 	public static void main(String[] args)

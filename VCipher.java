@@ -6,6 +6,7 @@ public class VCipher
 {
 	private char [] alphabet;   //the letters of the alphabet
 	private final int SIZE = 26;
+	private char [][] cipher;
         // more instance variables
 	
 	/** 
@@ -14,8 +15,53 @@ public class VCipher
 	 */
 	public VCipher(String keyword)
 	{
-	    // your code
+		alphabet = new char [SIZE];
+		for (int i = 0; i < SIZE; i++)
+			alphabet[i] = (char)('A' + i);
+		cipher = createCipher(keyword);
+		
 	}
+	
+	public char [][] createCipher(String keyword)
+	{
+		//Number of columns will always be equal to size of alphabet
+		//Number of rows will depend on length of keyword.
+		char [][] newCipher = new char [keyword.length()][SIZE];
+		
+		for(int i = 0; i < keyword.length(); i++)
+		{
+			int cipherPointer = 0;
+			char currentChar = keyword.charAt(i);
+			newCipher[i][0] = currentChar;
+			cipherPointer++; //Pointer telling us what the next empty index in the row is.
+			
+			
+			for(int j = 0; j < SIZE; j++)
+			{
+				int index = currentChar-'A' + j;
+				if(index > SIZE-1)
+				{
+					index = index - SIZE;
+				}
+				
+				if(currentChar != alphabet [index])
+				{
+					newCipher[i][cipherPointer] = alphabet[index];
+					cipherPointer++;
+				}
+			}
+			
+			System.out.println(newCipher[i]);
+			System.out.println(newCipher[i].length);
+		}
+		
+
+		return newCipher;
+	}
+	
+	
+	
+	
 	/**
 	 * Encode a character
 	 * @param ch the character to be encoded
@@ -35,4 +81,12 @@ public class VCipher
 	{
 	    return ' ';  // replace with your code
 	}
+	
+	public static void main (String[] args)
+	{
+		VCipher vipher = new VCipher("TIGER");
+	}
+	
+	
+	
 }
