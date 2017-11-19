@@ -97,6 +97,8 @@ public class CipherGUI extends JFrame implements ActionListener
 	    	}
 	    	else if (e.getSource() == vigenereButton)
 	    	{
+	    		vcipher = new VCipher (keyField.getText().toUpperCase());
+	    		keyField.setText("");
 	    		processFile(true);
 	    	}
 	    }
@@ -143,109 +145,47 @@ public class CipherGUI extends JFrame implements ActionListener
 		}
 	}
 	
-	/** 
-	 * Is passed cipher keyword
-	 * Checks if keyword contains duplicate characters.
-	 * @return whether keyword contains duplicate characters.
-	 */
-	public boolean containsDuplicates(String s)
-	{
-		int l = s.length();
-		for(int i = 0; i<l; i++)
-		{
-			char base = s.charAt(i);
-			
-			for(int j = i+1; j<l; j++)
-			{
-				char otherChar = s.charAt(j);
-				if(base == otherChar)
-				{
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
-	
-	/** 
-	 * Is passed cipher keyword
-	 * Checks if keyword contains punctuation. 
-	 * @return whether keyword contains punctuation.
-	 */
-	public boolean containsPunctuation(String s)
-	{
-		//Capitalize all letters in keyword to simplify test (i.e. smaller range of unicode values).
-		s = s.toUpperCase();
-		//Go through every character in keyword
-		for(int i=0; i<s.length(); i++)
-		{
-			//Use unicode values to determine if character is not in the alphabet AND not a number.
-			int differenceInt = s.charAt(i)-'0';
-			System.out.println(differenceInt);
-			int differenceLetter = s.charAt(i)-'A';
-			System.out.println(differenceLetter);
-			boolean notANumber = differenceInt < 0 || differenceInt > 10;
-			boolean notALetter = differenceLetter < 0 || differenceLetter > 25;
-			
-			//If character unicode value is not in range of either numbers or letters
-			if(notANumber && notALetter)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public boolean containsNumbers(String s)
-	{
-		for(int i=0; i<s.length(); i++)
-		{
-			int difference = s.charAt(i)-'0';
-			if(difference >= 0 && difference <= 10)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	
 	
 	/** 
 	 * Obtains filename from GUI
 	 * The details of the filename and the type of coding are extracted
 	 * If the filename is invalid, a message is produced 
-	 * The details obtained from the filename must be remembered
 	 * @return whether a valid filename was entered
 	 */
 	private boolean processFileName()
 	{
 		String fileName = messageField.getText();
+		//Check if file name is empty.
 		int l = fileName.length();
 		int lNoSpace = fileName.trim().length();
 		if(l==0 || lNoSpace==0)
 		{
 			JOptionPane.showMessageDialog(null, "File name is empty. Please enter a valid file name.", "Invalid File Name", JOptionPane.ERROR_MESSAGE);
+			messageField.setText("");
 			return false;
 		}
+		
+		//Check if file name finishes with P or C, error if not.
 		char lastChar = fileName.charAt(l-1);
 		if(lastChar != 'P'  && lastChar != 'C')
 		{
 			JOptionPane.showMessageDialog(null, "Please ensure that the filename ends with: \n 'P' for plaintext files OR \n 'C' For encrypted files.", "Invalid File Name", JOptionPane.ERROR_MESSAGE);
+			messageField.setText("");
 			return false;
 		}
+		
 		else if(containsPunctuation(fileName))
 		{
 			JOptionPane.showMessageDialog(null, "The file name cannot contain punctuation.", "Invalid File Name", JOptionPane.ERROR_MESSAGE);
-			keyField.setText("");
+			messageField.setText("");
 			return false;
 		}
+		//Store file name details if they are valid.
 		else
 		{
-			this.fileName=fileName;
-			this.codeType=lastChar;
+			this.fileName = fileName;
+			this.codeType = lastChar;
+			messageField.setText("");
 			return true;
 		}
 		
@@ -263,15 +203,18 @@ public class CipherGUI extends JFrame implements ActionListener
 		String fileNameActual = fileName + ".txt";
 		String outputFileName = fileName.substring(0, fileName.length()-1);
 		String reportFileName = outputFileName +"F.txt";
-		if(codeType == 'P')
+		
+		//Use code type to determine output file name.
+		if(codeType == 'P') //if input file is plain text.
 		{
 			outputFileName = outputFileName + "C.txt";
 		}
-		else
+		else //If input file is already encrypted.
 		{
 			outputFileName = outputFileName + "D.txt";
 		}
 		
+		//Create and fill output files.
 		try
 		{
 			FileReader reader = new FileReader(fileNameActual);
@@ -285,39 +228,53 @@ public class CipherGUI extends JFrame implements ActionListener
 				//Get next character in file (.read() returns an int). -1 if end of file.
 				int next = reader.read();
 				char nextChar;
+				//Exits loop upon reaching end of file so that reader.close() can be reached.
 				if(next == -1)
 				{
-					//Exits loop upon reaching end of file so that reader.close() can be reached. Notifies user end of file has been reached.
-					System.err.println("");
-					System.err.println("End of File");
 					loop = false;
-					
 				}
 				else
 				{
 					//Cast from int to char to get character.
 					nextChar = (char) next;
+					//Encode file if it is plain text, decode if not.
 					if(codeType == 'P')
 					{
-						char encoded = mcipher.encode(nextChar);
-						writer.write(encoded);
-						if(mcipher.isALetter(encoded))
+						char encoded;
+						//Encode using corresponding cipher.
+						if(vigenere)
 						{
-							reporter.addChar(encoded);
+							encoded = vcipher.encode(nextChar);
 						}
+						else
+						{
+							encoded = mcipher.encode(nextChar);
+						}
+						//Write encoded character to file and update letter frequencies.
+						writer.write(encoded);
+						reporter.addChar(encoded);
+						
 					}
 					else
 					{
-						char decoded = mcipher.decode(nextChar);
-						writer.write(decoded);
-						if(mcipher.isALetter(decoded))
+						char decoded;
+						//Decode using corresponding cipher.
+						if(vigenere)
 						{
-							reporter.addChar(decoded);
+							decoded = vcipher.decode(nextChar);
 						}
+						else
+						{
+							decoded = mcipher.decode(nextChar);
+						}
+						//Write decoded character to file and update letter frequencies.
+						writer.write(decoded);
+						reporter.addChar(decoded);
+						
 					}
-					System.out.print(nextChar);
 				}
 			}
+			//Generate letter frequencies report.
 			String report = reporter.getReport();
 			reportWriter.write(report);
 			
@@ -328,16 +285,86 @@ public class CipherGUI extends JFrame implements ActionListener
 		catch(FileNotFoundException e)
 		{
 			JOptionPane.showMessageDialog(null, "File not found. Please enter a valid file name.", "File Not Found", JOptionPane.ERROR_MESSAGE);
+			return false;
 		}
 		catch(IOException e)
 		{
-			System.err.println("IOException");
+			JOptionPane.showMessageDialog(null, "An Input/Output error has ocurred. Please re-enter details correctly.", "Unknown Exception", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+	    return true;
+	}
+	
+	/** 
+	 * Is passed cipher keyword in all caps.
+	 * Checks if keyword contains duplicate characters.
+	 * @return whether keyword contains duplicate characters.
+	 */
+	public boolean containsDuplicates(String s)
+	{
+		s = s.toUpperCase();
+		int l = s.length();
+		//Compare each character in the string to others to test if they are identical.
+		for(int i = 0; i<l; i++)
+		{
+			char base = s.charAt(i);
+			
+			//No need to compare to prior characters as those tests would have already been made in previous loop run, hence j = i+1;
+			for(int j = i+1; j<l; j++)
+			{
+				char otherChar = s.charAt(j);
+				if(base == otherChar)
+				{
+					return true;
+				}
+			}
 		}
 		
-		
-		
-		
-	    return true;  // replace with your code
+		return false;
+	}
+	
+	/** 
+	 * Is passed cipher keyword or file name in all caps.
+	 * Checks if they contain punctuation. 
+	 * @return whether keyword contains punctuation.
+	 */
+	public boolean containsPunctuation(String s)
+	{
+		s = s.toUpperCase();
+		//Go through every character in keyword
+		for(int i=0; i<s.length(); i++)
+		{
+			//Use unicode values to determine if character is not in the alphabet AND not a number.
+			int differenceInt = s.charAt(i)-'0';
+			int differenceLetter = s.charAt(i)-'A';
+			boolean notANumber = differenceInt < 0 || differenceInt > 10;
+			boolean notALetter = differenceLetter < 0 || differenceLetter > 25;
+			
+			//If character unicode value is not in range of either numbers or letters
+			if(notANumber && notALetter)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/** 
+	 * Is passed cipher keyword or file name in all caps.
+	 * Checks if they contain numbers.
+	 * @return whether keyword contains numbers.
+	 */
+	public boolean containsNumbers(String s)
+	{
+		for(int i=0; i<s.length(); i++)
+		{
+			int difference = s.charAt(i)-'0';
+			if(difference >= 0 && difference <= 10)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static void main(String [] args)

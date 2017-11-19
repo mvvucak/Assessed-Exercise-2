@@ -45,15 +45,18 @@ public class LetterFrequencies
 	}
 		
 	/**
-	 * Increases frequency details for given character
+	 * Increases frequency details for given character if it is a letter.
 	 * @param ch the character just read
 	 */
 	public void addChar(char ch)
 	{
-		int index = ch-'A';
-		alphaCounts[index]++;
-		totChars++;
-	    // your code
+		if(isALetter(ch))
+		{
+			int index = ch-'A';
+			alphaCounts[index]++;
+			totChars++;
+		}
+		
 	}
 	
 	/**
@@ -104,12 +107,14 @@ public class LetterFrequencies
 	 */
 	public String getReport()
 	{
+		//Update most frequent character and character frequencies as percentages.
 		updateMaxCh();
 		calculateFreqPercentage();
+		//Create report.
 		String report = String.format("LETTER ANALYSIS %n %n");
 		String headings = String.format("%7s %5s %6s %9s %5s %n", "Letter", "Freq", "Freq%", "AvgFreq%", "Diff");
 		report = report + headings;
-		
+		//Add details for each letter in the alphabet to the report.
 		for(int i=0; i<SIZE; i++)
 		{
 			String row = String.format("%4s %7d %6.1f %7.1f %7.1f %n", alphabet[i], alphaCounts[i], textFreq[i], avgCounts[i], (textFreq[i] - avgCounts[i]));
@@ -118,6 +123,25 @@ public class LetterFrequencies
 		
 		report = report + String.format("%n The most frequent letter is %c at %.1f", maxCh, getMaxPC()) + "%.";
 	    return report; 
+	}
+	
+	/**
+	 * Determine whether a character is alphabetic (i.e. not a number, space or punctuation). Assumes letter will be capitalized.
+	 * @param input the character to be tested
+	 * @return whether character is alphabetic (true) or not (false)
+	 */
+	public boolean isALetter(char input)
+	{
+		//Use char unicode values to determine whether character is a letter (i.e. between A and Z, inclusive)
+		int difference = input-'A';
+		if(difference>=0 && difference<=25)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	public static void main(String[] args)
