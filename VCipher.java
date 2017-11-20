@@ -152,12 +152,4 @@ public class VCipher
 			return false;
 		}
 	}
-	
-	public static void main (String[] args)
-	{
-		VCipher vipher = new VCipher("TIGER");
-	}
-	
-	
-	
 }

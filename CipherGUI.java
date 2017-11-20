@@ -91,15 +91,33 @@ public class CipherGUI extends JFrame implements ActionListener
 	    {
 	    	if(e.getSource() == monoButton)
 	    	{
-	    		mcipher = new MonoCipher(keyField.getText().toUpperCase());
+	    		//Get keyword and create Monoalphabetic cipher
+	    		mcipher = new MonoCipher(keyField.getText());
+	    		//Perform encryption/decryption
+	    		boolean successful = processFile(false);
 	    		keyField.setText("");
-	    		processFile(false);
+	    		//Terminate Program if file processing was successful.
+	    		if(successful)
+	    		{
+	    			this.setVisible(false);
+		    		this.dispose();
+	    		}
+	    		
 	    	}
 	    	else if (e.getSource() == vigenereButton)
 	    	{
-	    		vcipher = new VCipher (keyField.getText().toUpperCase());
+	    		//Get keyword and create Vigenere cipher
+	    		vcipher = new VCipher (keyField.getText());
+	    		//Perform encryption/decryption
+	    		boolean successful = processFile(true);
 	    		keyField.setText("");
-	    		processFile(true);
+	    		//Terminate program if file processing was successful.
+	    		if(successful)
+	    		{
+	    			this.setVisible(false);
+		    		this.dispose();
+	    		}
+	    		
 	    	}
 	    }
 	    
@@ -112,18 +130,12 @@ public class CipherGUI extends JFrame implements ActionListener
 	 */
 	private boolean getKeyword()
 	{
-		String keyword = keyField.getText().toUpperCase();
+		String keyword = keyField.getText();
 		
 		//Check if keyword is empty string, warn user if so.
 		if(keyword.isEmpty() || keyword.trim().isEmpty())
 		{
 			JOptionPane.showMessageDialog(null, "The keyword cannot be empty.", "Invalid Keyword", JOptionPane.ERROR_MESSAGE);
-			keyField.setText("");
-			return false;
-		}
-		else if (containsDuplicates(keyword))
-		{
-			JOptionPane.showMessageDialog(null, "The keyword cannot contain duplicate letters.", "Invalid Keyword", JOptionPane.ERROR_MESSAGE);
 			keyField.setText("");
 			return false;
 		}
@@ -136,6 +148,19 @@ public class CipherGUI extends JFrame implements ActionListener
 		else if (containsPunctuation(keyword))
 		{
 			JOptionPane.showMessageDialog(null, "The keyword cannot contain punctuation.", "Invalid Keyword", JOptionPane.ERROR_MESSAGE);
+			keyField.setText("");
+			return false;
+			
+		}
+		else if(containsLowerCase(keyword))
+		{
+			JOptionPane.showMessageDialog(null, "The keyword cannot contain lower case letters. \n All letters must be upper case.", "Invalid Keyword", JOptionPane.ERROR_MESSAGE);
+			keyField.setText("");
+			return false;
+		}
+		else if (containsDuplicates(keyword))
+		{
+			JOptionPane.showMessageDialog(null, "The keyword cannot contain duplicate letters.", "Invalid Keyword", JOptionPane.ERROR_MESSAGE);
 			keyField.setText("");
 			return false;
 		}
@@ -185,7 +210,7 @@ public class CipherGUI extends JFrame implements ActionListener
 		{
 			this.fileName = fileName;
 			this.codeType = lastChar;
-			messageField.setText("");
+			//messageField.setText("");
 			return true;
 		}
 		
@@ -298,6 +323,7 @@ public class CipherGUI extends JFrame implements ActionListener
 	/** 
 	 * Is passed cipher keyword in all caps.
 	 * Checks if keyword contains duplicate characters.
+	 * @param s The keyword.
 	 * @return whether keyword contains duplicate characters.
 	 */
 	public boolean containsDuplicates(String s)
@@ -324,12 +350,14 @@ public class CipherGUI extends JFrame implements ActionListener
 	}
 	
 	/** 
-	 * Is passed cipher keyword or file name in all caps.
+	 * Is passed cipher keyword or file name.
 	 * Checks if they contain punctuation. 
+	 * @param s The keyword or file name
 	 * @return whether keyword contains punctuation.
 	 */
 	public boolean containsPunctuation(String s)
 	{
+		//Convert all letters to upper case to simplify testing.
 		s = s.toUpperCase();
 		//Go through every character in keyword
 		for(int i=0; i<s.length(); i++)
@@ -350,8 +378,9 @@ public class CipherGUI extends JFrame implements ActionListener
 	}
 	
 	/** 
-	 * Is passed cipher keyword or file name in all caps.
+	 * Is passed cipher keyword or file name.
 	 * Checks if they contain numbers.
+	 * @param s The keyword or file name.
 	 * @return whether keyword contains numbers.
 	 */
 	public boolean containsNumbers(String s)
@@ -363,6 +392,26 @@ public class CipherGUI extends JFrame implements ActionListener
 			{
 				return true;
 			}
+		}
+		return false;
+	}
+	
+	/** 
+	 * Is passed cipher keyword.
+	 * Checks if it contains lower case letters. Necessary only because specs say so, can circumvent using toUpperCase()
+	 * @param s The keyword
+	 * @return whether keyword contains lower case letters.
+	 */
+	public boolean containsLowerCase(String s)
+	{
+		for (int i=0; i<s.length(); i++)
+		{
+			int difference = s.charAt(i)-'a';
+			if(difference >= 0 && difference <= 25)
+			{
+				return true;
+			}
+			
 		}
 		return false;
 	}

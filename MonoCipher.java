@@ -130,24 +130,4 @@ public class MonoCipher
 			return false;
 		}
 	}
-	
-	
-	public static void main(String[] args)
-	{
-		MonoCipher test = new MonoCipher("LEOPARD");
-		System.out.println("");
-		//test.encode('Z');
-		test.decode('.');
-		test.decode(' ');
-		test.decode(',');
-		test.decode('L');
-		test.decode('A');
-		test.decode('3');
-		test.decode('!');
-		test.decode('0');
-		
-		
-		
-		
-	}
 }
