@@ -22,6 +22,14 @@ public class VCipher
 		cipher = createCipher(keyword);
 		cipherRow = 0;
 		
+		//Print out cipher in legible format.
+		for(int o = 0; o < cipher.length; o++)
+		{
+			for (int i = 0; i < SIZE; i++)
+				System.out.print(cipher[o][i] + " ");
+			System.out.println(" Row Length: " + cipher[o].length);
+		}
+		
 	}
 	
 	public char [][] createCipher(String keyword)
@@ -56,8 +64,6 @@ public class VCipher
 					cipherPointer++; //Increment pointer.
 				}
 			}
-			System.out.print(newCipher[i]);
-			System.out.println(" Row Length: " + newCipher[i].length);
 		}
 		return newCipher;
 	}

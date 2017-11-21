@@ -26,7 +26,7 @@ public class MonoCipher
 		
 		this.cipher = createCipher(keyword);
 		
-		System.out.println(cipher);
+		//System.out.println(cipher);
 		for (int i = 0; i < SIZE; i++)
 			System.out.print(cipher[i] +" ");
 			
